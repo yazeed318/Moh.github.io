@@ -1,19 +1,74 @@
-<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Solar Declination & Solar Attitude Calculator</title>
+  <title>Solar Declination &amp; Solar Attitude Calculator</title>
   <style>
-    body{font-family:Arial, sans-serif; margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f1724;color:#e6eef8;flex-direction:column}
-    .card{width:min(500px,94vw);background:#0b1220;border-radius:14px;padding:22px;box-shadow:0 6px 30px rgba(0,0,0,0.6);margin-bottom:20px}
-    h1{margin:0 0 8px;font-size:20px}
-    p{margin-bottom:18px;color:#9aa7bf}
-    label{display:block;font-size:13px;color:#9aa7bf;margin-bottom:6px}
-    input[type=number],input[type=date]{width:100%;padding:10px;border-radius:8px;border:none;background:#141d33;color:inherit;margin-bottom:10px}
-    button{margin-top:10px;background:#60a5fa;color:#04233b;border:none;padding:10px 14px;border-radius:9px;font-weight:600;cursor:pointer;width:100%}
-    .result{margin-top:16px;padding:14px;border-radius:10px;background:rgba(255,255,255,0.04)}
-    footer{color:#9aa7bf;font-size:12px;margin-top:10px}
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f1724;
+      color: #e6eef8;
+      flex-direction: column;
+    }
+    .card {
+      width: min(500px, 94vw);
+      background: #0b1220;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+      margin-bottom: 20px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 20px;
+    }
+    p {
+      margin-bottom: 18px;
+      color: #9aa7bf;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      color: #9aa7bf;
+      margin-bottom: 6px;
+    }
+    input[type='number'],
+    input[type='date'] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: #141d33;
+      color: inherit;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 10px;
+      background: #60a5fa;
+      color: #04233b;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 9px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+    }
+    .result {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    footer {
+      color: #9aa7bf;
+      font-size: 12px;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -38,15 +93,17 @@
     <input id="latitude" type="number" step="0.0001" placeholder="e.g. 32.0" />
     <label for="hourAngle">Hour Angle (°)</label>
     <input id="hourAngle" type="number" step="0.0001" placeholder="e.g. 15.0" />
+    <label for="manualDeclination">Or Enter Declination (°) — overrides calculated value</label>
+    <input id="manualDeclination" type="number" step="0.0001" placeholder="e.g. 23.45" />
     <button id="calcB">Calculate Solar Attitude</button>
     <div class="result">
       <div><strong>Solar Attitude (B):</strong> <span id="out-b">—</span></div>
     </div>
   </div>
 
- <footer>
-        <p>© 2025 Mohammad Bataineh | Instructor: Dr Hussain Alzoubi</p>
-    </footer>
+  <footer>
+    <p>© 2025 Mohammad Bataineh | Instructor: Dr Hussain Alzoubi</p>
+  </footer>
 
   <script>
     const jdInput = document.getElementById('julian');
@@ -57,33 +114,34 @@
 
     const latInput = document.getElementById('latitude');
     const hourInput = document.getElementById('hourAngle');
+    const manualDecInput = document.getElementById('manualDeclination');
     const calcBBtn = document.getElementById('calcB');
     const outB = document.getElementById('out-b');
 
     let currentDec = null; // store declination in degrees
 
-    function declinationFromJulian(jd){
+    function declinationFromJulian(jd) {
       const deg = 360 * (284 + jd) / 365.25;
-      const rad = deg * Math.PI / 180;
+      const rad = (deg * Math.PI) / 180;
       return 23.45 * Math.sin(rad);
     }
 
-    function dateToJulian(date){
+    function dateToJulian(date) {
       const dt = new Date(date);
       const start = new Date(dt.getFullYear(), 0, 0);
-      const diff = (dt - start) + ((start.getTimezoneOffset() - dt.getTimezoneOffset()) * 60 * 1000);
+      const diff = dt - start + (start.getTimezoneOffset() - dt.getTimezoneOffset()) * 60 * 1000;
       const day = Math.floor(diff / (1000 * 60 * 60 * 24));
       return day;
     }
 
-    calcBtn.addEventListener('click', ()=>{
+    calcBtn.addEventListener('click', () => {
       let jdVal = null;
-      if(jdInput.value){
+      if (jdInput.value) {
         jdVal = Number(jdInput.value);
-      } else if(dateInput.value){
+      } else if (dateInput.value) {
         jdVal = dateToJulian(dateInput.value);
       }
-      if(!jdVal || jdVal < 1 || jdVal > 366){
+      if (!jdVal || jdVal < 1 || jdVal > 366) {
         outJD.textContent = '—';
         outDec.textContent = '—';
         currentDec = null;
@@ -93,18 +151,31 @@
       outJD.textContent = jdVal;
       outDec.textContent = dec.toFixed(4) + '°';
       currentDec = dec;
+      manualDecInput.value = ''; // clear manual input to avoid confusion
     });
 
-    calcBBtn.addEventListener('click', ()=>{
-      if(currentDec === null){
-        outB.textContent = 'Calculate declination first';
+    calcBBtn.addEventListener('click', () => {
+      let decToUse = currentDec;
+      if (manualDecInput.value) {
+        decToUse = Number(manualDecInput.value);
+      }
+
+      if (decToUse === null || isNaN(decToUse)) {
+        outB.textContent = 'Please calculate or input declination first';
         return;
       }
-      const L = Number(latInput.value) * Math.PI / 180;
-      const H = Number(hourInput.value) * Math.PI / 180;
-      const decRad = currentDec * Math.PI / 180;
-      const sinB = Math.cos(L) * Math.cos(decRad) * Math.cos(H) + Math.sin(L) * Math.sin(decRad);
-      const B = Math.asin(sinB) * 180 / Math.PI;
+
+      const L = Number(latInput.value);
+      const H = Number(hourInput.value);
+
+      if (isNaN(L) || isNaN(H)) {
+        outB.textContent = 'Please enter valid latitude and hour angle';
+        return;
+      }
+
+      const rad = Math.PI / 180;
+      const sinB = Math.cos(L * rad) * Math.cos(decToUse * rad) * Math.cos(H * rad) + Math.sin(L * rad) * Math.sin(decToUse * rad);
+      const B = Math.asin(sinB) * (180 / Math.PI);
       outB.textContent = B.toFixed(4) + '°';
     });
   </script>
